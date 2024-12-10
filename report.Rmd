@@ -1,0 +1,24 @@
+---
+title: "Lab 3"
+author: "johmo870, nisra674"
+date: "`r Sys.Date()`"
+output: 
+  pdf_document:
+    latex_engine: xelatex
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Statement of Contribution
+ - Nisal Amashan(nisra674) - 
+ - John Möller (johmo870) - 
+ 
+# Assignment 1: Theory
+
+# Assignment 2: Kernel Methods
+
+# Assignment 3: Support Vector Machines
+
+# Assignment 4: Neural Networks

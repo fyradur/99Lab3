@@ -1,5 +1,8 @@
 # 99Lab3
 
+## Discord Server
+https://discord.gg/RGyBW9Rd
+
 ## How to contribute
 1. Go to Issues here on this github repo.
 2. Choose one assignment, and then claim it by commenting saying you'll take it.

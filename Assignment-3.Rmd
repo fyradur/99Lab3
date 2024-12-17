@@ -1,0 +1,212 @@
+---
+title: "Assignment-3"
+output:
+  html_document: default
+  pdf_document: default
+date: "2024-12-17"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Statement of Contribution
+
+-   Alexander Björhag (alebj452) - Assignment 1 Assignment 3, Report
+
+## Assignment 3
+
+The code in the file Lab3Block1 2021 SVMs St.R performs SVM model selection to classify the spam dataset. To do so, the code uses the function ksvm from the R package
+kernlab, which also includes the spam dataset. All the SVM models to select from use
+the radial basis function kernel (also known as Gaussian) with a width of 0.05. The C parameter varies between the models. Run the code in the file Lab3Block1 2021 SVMs St.R and
+answer the following questions.
+
+### Code we get for this Assignment 
+
+```{r}
+library(kernlab)
+set.seed(1234567890)
+
+data(spam)
+foo <- sample(nrow(spam))
+spam <- spam[foo,]
+tr <- spam[1:3000, ]
+va <- spam[3001:3800, ]
+trva <- spam[1:3800, ]
+te <- spam[3801:4601, ] 
+
+by <- 0.3
+err_va <- NULL
+for(i in seq(by,5,by)){
+  filter <- ksvm(type~.,data=tr,kernel="rbfdot",kpar=list(sigma=0.05),C=i,scaled=FALSE)
+  mailtype <- predict(filter,va[,-58])
+  t <- table(mailtype,va[,58])
+  err_va <-c(err_va,(t[1,2]+t[2,1])/sum(t))
+}
+
+filter0 <- ksvm(type~.,data=tr,kernel="rbfdot",kpar=list(sigma=0.05),C=which.min(err_va)*by,scaled=FALSE)
+mailtype <- predict(filter0,va[,-58])
+t <- table(mailtype,va[,58])
+err0 <- (t[1,2]+t[2,1])/sum(t)
+cat("Filter0 error:", err0, "\n")
+
+filter1 <- ksvm(type~.,data=tr,kernel="rbfdot",kpar=list(sigma=0.05),C=which.min(err_va)*by,scaled=FALSE)
+mailtype <- predict(filter1,te[,-58])
+t <- table(mailtype,te[,58])
+err1 <- (t[1,2]+t[2,1])/sum(t)
+cat("Filter1 error:", err1, "\n")
+
+filter2 <- ksvm(type~.,data=trva,kernel="rbfdot",kpar=list(sigma=0.05),C=which.min(err_va)*by,scaled=FALSE)
+mailtype <- predict(filter2,te[,-58])
+t <- table(mailtype,te[,58])
+err2 <- (t[1,2]+t[2,1])/sum(t)
+cat("Filter2 error:", err2, "\n")
+
+filter3 <- ksvm(type~.,data=spam,kernel="rbfdot",kpar=list(sigma=0.05),C=which.min(err_va)*by,scaled=FALSE)
+mailtype <- predict(filter3,te[,-58])
+t <- table(mailtype,te[,58])
+err3 <- (t[1,2]+t[2,1])/sum(t)
+cat("Filter3 error:", err3, "\n")
+```
+
+Here is the generalization error rate for each model created from the code we get.
+
+### Questions to answer
+
+1) Which filter do you return to the user ? filter0, filter1, filter2 or filter3?
+Why?
+
+The filter that we should return is filter1 because the other filter models have some things that can be problematic. Before every filter model a for loop was created where we were using the training dataset and the validation set to chose the hyperparameter C. So in filter0 we are reusing the validation set when we evaluate the model again that can give biased error.
+
+In filter3 we are using the entire dataset were all the data sets (Train, validation and test are divided) so we are reusing the validation set when choosing hyperparamter c and when we later evaluate the model were we are reusing the test set. That is the reason we get the best error rate in that model.
+
+Between filter1 and filter2 the error rate is pretty close and filer2 is actually better, but in this model we have combined the training and validation set and the hyperparameter c was tuned with the help of the validation set there is a risk of data leakage even if we in the end have the test data set to evaluate the model.
+
+So that is the reason why filter1 should be chosen. That filter gives the most fair estimate because we use the validation set when tuning the hyperparamter c and later uses the unseen test data set when evaluating the model.
+
+(2) What is the estimate of the generalization error of the filter returned to the user? err0,
+err1, err2 or err3? Why?
+
+Like i mentioned before the filter1 should be return with the generalization error err1 (0.1672909) because that is the most fair were we have used the unseen test set in the end when we evaluate the model and should therefore reflect how well the model perform on "real data".
+
+(3) Once a SVM has been fitted to the training data, a new point is essentially classified
+according to the sign of a linear combination of the kernel function values between the
+support vectors and the new point. You are asked to implement this linear combination
+for filter3. You should make use of the functions alphaindex, coef and b that
+return the indexes of the support vectors, the linear coefficients for the support vectors,
+and the negative intercept of the linear combination. See the help file of the kernlab
+package for more information. You can check if your results are correct by comparing
+them with the output of the function predict where you set type = "decision".
+Do so for the first 10 points in the spam dataset. Feel free to use the template provided
+in the Lab3Block1 2021 SVMs St.R file.
+
+```{r }
+rbf_kernal <- rbfdot(0.05) # the radial basis function kernel from the package
+sv<-alphaindex(filter3)[[1]] 
+co<-coef(filter3)[[1]]
+inte<- - b(filter3)
+k<-NULL
+for(i in 1:10){ # We produce predictions for just the first 10 points in the dataset.
+  k2<-NULL
+  for(j in 1:length(sv)){
+    k2<- c(k2, rbf_kernal(as.vector(unlist(spam[i, -58])), as.vector(unlist(spam[sv[j], -58]))))
+  }
+  k<-c(k, sum(co*k2) + inte)
+}
+```
+
+```{r include=FALSE}
+temp <- data.frame(
+  "Manual Calculations" = k,
+  "Model Calculations" = as.vector(predict(filter3, spam[1:10, -58], type = "decision"))
+)
+```
+
+```{r }
+knitr::kable(temp, caption = "Comparison of Manual and Model Calculations for the first 10 points in the spam dataset ")
+```
+
+After the implementation of some code to the template we can see that we get the same values as the predict function from the model
+
+## Appendix
+
+```{r echo=TRUE, eval=FALSE}
+# Lab 3 block 1 of 732A99/TDDE01/732A68 Machine Learning
+# Author: jose.m.pena@liu.se
+# Made for teaching purposes
+#install.packages("kernlab")
+library(kernlab)
+set.seed(1234567890)
+
+data(spam)
+foo <- sample(nrow(spam))
+spam <- spam[foo,]
+tr <- spam[1:3000, ]
+va <- spam[3001:3800, ]
+trva <- spam[1:3800, ]
+te <- spam[3801:4601, ] 
+
+by <- 0.3
+err_va <- NULL
+for(i in seq(by,5,by)){
+  filter <- ksvm(type~.,data=tr,kernel="rbfdot",kpar=list(sigma=0.05),C=i,scaled=FALSE)
+  mailtype <- predict(filter,va[,-58])
+  t <- table(mailtype,va[,58])
+  err_va <-c(err_va,(t[1,2]+t[2,1])/sum(t))
+}
+
+filter0 <- ksvm(type~.,data=tr,kernel="rbfdot",kpar=list(sigma=0.05),C=which.min(err_va)*by,scaled=FALSE)
+mailtype <- predict(filter0,va[,-58])
+t <- table(mailtype,va[,58])
+err0 <- (t[1,2]+t[2,1])/sum(t)
+err0
+
+filter1 <- ksvm(type~.,data=tr,kernel="rbfdot",kpar=list(sigma=0.05),C=which.min(err_va)*by,scaled=FALSE)
+mailtype <- predict(filter1,te[,-58])
+t <- table(mailtype,te[,58])
+err1 <- (t[1,2]+t[2,1])/sum(t)
+err1
+
+filter2 <- ksvm(type~.,data=trva,kernel="rbfdot",kpar=list(sigma=0.05),C=which.min(err_va)*by,scaled=FALSE)
+mailtype <- predict(filter2,te[,-58])
+t <- table(mailtype,te[,58])
+err2 <- (t[1,2]+t[2,1])/sum(t)
+err2
+
+filter3 <- ksvm(type~.,data=spam,kernel="rbfdot",kpar=list(sigma=0.05),C=which.min(err_va)*by,scaled=FALSE)
+mailtype <- predict(filter3,te[,-58])
+t <- table(mailtype,te[,58])
+err3 <- (t[1,2]+t[2,1])/sum(t)
+err3
+
+# Questions
+
+# 1. Which filter do we return to the user ? filter0, filter1, filter2 or filter3? Why?
+
+
+# 2. What is the estimate of the generalization error of the filter returned to the user? err0, err1, err2 or err3? Why?
+
+
+# 3. Implementation of SVM predictions.
+
+
+rbf_kernal <- rbfdot(0.05) # the radial basis function kernel
+sv<-alphaindex(filter3)[[1]]
+co<-coef(filter3)[[1]]
+inte<- - b(filter3)
+k<-NULL
+for(i in 1:10){ # We produce predictions for just the first 10 points in the dataset.
+  k2<-NULL
+  for(j in 1:length(sv)){
+    k2<- c(k2, rbf_kernal(as.vector(unlist(spam[i, -58])), as.vector(unlist(spam[sv[j], -58]))))
+  }
+  k<-c(k, sum(co*k2) + inte)
+}
+k
+predict(filter3,spam[1:10,-58], type = "decision")
+temp <- data.frame(
+  "Manual Calculations" = k,
+  "Model Calculations" = as.vector(predict(filter3, spam[1:10, -58], type = "decision"))
+)
+
+```

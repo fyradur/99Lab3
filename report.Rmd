@@ -208,7 +208,7 @@ plot(tr, cex=2, main="Linear Activation: Training (Black), Test (Blue), Predicti
 points(te, col = "blue", cex=1)
 points(te[,1], predict(nn_linear, te), col="red", cex=1)
 ```
-\newpage
+
 
 - **ReLU Activation**: The predictions exhibited sharp changes but failed to approximate the smooth sine curve.
 

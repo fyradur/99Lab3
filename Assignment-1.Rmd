@@ -1,0 +1,28 @@
+---
+title: "Assignment1"
+output: html_document
+date: "2024-12-17"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# 1. THEORY
+
+## What is the kernel trick?
+
+The kernel trick is that we can choose a kernal $k(x, x´)$ rather than designing a d-dimensional transformation $\phi(x)$ since $\phi(x)$ only appears in the model model through inner products like $\phi(x)^T\phi(x´)$
+This allows us to work with kernels $k(x, x´)$ instead of chosing $\phi(x)$
+Found on page 194 in the book
+
+## In the literature, it is common to see a formulation of SVMs that makes use of a hyperparameter C. What is the purpose of this hyperparameter?
+
+myabe page 211
+
+
+
+## In neural networks, what do we mean by mini-batch and epoch?
+
+A mini-batch is a small subset of the training data used to compute the gradient during training, typically containing 10, 100, or 1,000 data points. An epoch refers to one complete pass through the entire training dataset, which consists of $\frac{n}{n_b}$ iterations where n is the total number of data points and $n_b$ is the size of a mini-batch.
+

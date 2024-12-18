@@ -16,7 +16,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Statement of Contribution
  - Nisal Amashan(nisra674) - Assignment4, Report
- - John Möller (johmo870) - Assignment2, Report
+ - John Möller (johmo870) - Assignment2 (did not complete in time), Report
  - Alexander Björhag (alebj452) - Assignment1, Assignment3, Report
  
 # Assignment 1: Theory
@@ -43,6 +43,7 @@ Found on page 125 in the book
 
 # Assignment 2: Kernel Methods
 
+(Not complete, bugs still present)
 ## Import and seed setting
 
 ```{r}
@@ -74,16 +75,12 @@ b <- 14.826
 times <- format(seq(from = as.POSIXct("04:00:00", format = "%H:%M:%S"),
                     to = as.POSIXct("24:00:00", format = "%H:%M:%S"),
                     by = "2 hours"), "%H:%M:%S")
-times <- c("04:00:00", "06:00:00", ..., "24:00:00")
-# Students’ code here
- 
-plot(temp, type="o")
 ```
 
 ## Gaussian kernels
 ```{r}
 gaussian_physical <- function(x1, x2) {
-  dist <- distHaversine(x1[5,4], x2[5,4]) # Distance in meters
+  dist <- distHaversine(as.numeric(x1[c(5,4)]), as.numeric(x2[c(5,4)])) # Distance in meters
   dist_km <- dist / 1000        # Convert to kilometers
   kernel_value <- exp(- (dist_km^2) / (2 * h_distance^2))
   
@@ -114,7 +111,7 @@ gaussian_product <- function(x1, x2) {
 ```
 
 ## Gram matrix
-
+(ignored)
 ```{r}
 compute_gram_matrix <- function(X, kernel_function) {
   n <- nrow(X)
@@ -130,7 +127,7 @@ compute_gram_matrix <- function(X, kernel_function) {
 ```
 
 ## Gram vector
-
+(ignored)
 ```{r}
 compute_gram_vector <- function(X, input, kernel_function) {
   n <- nrow(X)
@@ -140,6 +137,48 @@ compute_gram_vector <- function(X, input, kernel_function) {
   }
   return(vector)
 }
+```
+
+## Prediction
+```{r}
+predict_temperature_iteratively <- function(st, target_lat, target_lon, target_date, target_times, kernel_function) {
+  M <- length(target_times)  # Number of target time points
+  temp_predictions <- numeric(M)  # Initialize vector for predictions
+  
+  # Iterate over each target time
+  for (j in 1:M) {
+    target_time <- target_times[j]
+    kernel_values <- numeric(nrow(st))  # Initialize kernel values for all measurements
+    
+    # Iterate over each station measurement
+    for (i in 1:nrow(st)) {
+      x1 <- c(target_lat, target_lon, target_date, target_time)  # Target point
+      x2 <- st[i, ]  # Station data row
+      
+      # Compute the kernel value using the provided function
+      kernel_values[i] <- kernel_function(x1, x2)
+    }
+    
+    # Calculate the weighted sum of temperatures
+    numerator <- sum(kernel_values * st$temperature)
+    denominator <- sum(kernel_values)
+    
+    # Store the predicted temperature
+    temp_predictions[j] <- numerator / denominator
+  }
+  
+  return(temp_predictions)
+}
+
+prediction_sum <- predict_temperature_iteratively(st, a, b, date_to_predict, times, gaussian_sum)
+prediction_prod <- predict_temperature_iteratively(st, a, b, date_to_predict, times, gaussian_prod)
+```
+
+## Plots
+
+```{r}
+plot(prediction_sum, type = "o")
+plot(prediction_prod, type = "o")
 ```
 
 

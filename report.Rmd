@@ -66,16 +66,43 @@ st[order(st$date, decreasing = TRUE),][1:3,]
 
 
 ```{r}
-h_distance <- # These three values are up to the students
-h_date <-
-h_time <-
-a <- 58.4274 # The point to predict (up to the students)
+h_distance <- 1
+h_date <- 1
+h_time <- 1
+a <- 58.4274 
 b <- 14.826
-date <- "2013-11-04" # The date to predict (up to the students)
+times <- format(seq(from = as.POSIXct("04:00:00", format = "%H:%M:%S"),
+                    to = as.POSIXct("24:00:00", format = "%H:%M:%S"),
+                    by = "2 hours"), "%H:%M:%S")
 times <- c("04:00:00", "06:00:00", ..., "24:00:00")
-temp <- vector(length=length(times))
 # Students’ code here
+ 
 plot(temp, type="o")
+```
+
+## Gaussian kernels
+```{r}
+gaussian_physical <- function(x1, x2) {
+  dist <- distHaversine(x1[5,4], x2[5,4]) # Distance in meters
+  dist_km <- dist / 1000        # Convert to kilometers
+  kernel_value <- exp(- (dist_km^2) / (2 * h_distance^2))
+  
+  return(kernel_value)
+}
+
+
+gaussian_date <- function(x1, x2) {
+  date_diff <- abs(as.numeric(difftime(x1[9], x2[9], units = "days")))
+  return(exp(- (date_diff^2) / (2 * h_date^2)))
+}
+
+
+gaussian_time <- function(x1, x2) {
+  time1 <- as.POSIXct(x1[10], format = "%H:%M:%S", tz = "UTC")
+  time2 <- as.POSIXct(x2[10], format = "%H:%M:%S", tz = "UTC")
+  time_diff <- abs(as.numeric(difftime(time1, time2, units = "hours")))
+  return(exp(- (time_diff^2) / (2 * h_time^2)))
+}
 ```
 
 

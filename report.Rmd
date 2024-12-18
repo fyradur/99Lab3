@@ -125,10 +125,23 @@ compute_gram_matrix <- function(X, kernel_function) {
       gram_matrix[i, j] <- kernel_function(X[i, ], X[j, ])
     }
   }
-  
   return(gram_matrix)
 }
 ```
+
+## Gram vector
+
+```{r}
+compute_gram_vector <- function(X, input, kernel_function) {
+  n <- nrow(X)
+  vector <- c()
+  for (i in 1:n) {
+    vector <- c(vector, kernel_function(X[i,], input))
+  }
+  return(vector)
+}
+```
+
 
 
 

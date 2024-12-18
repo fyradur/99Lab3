@@ -105,6 +105,24 @@ gaussian_time <- function(x1, x2) {
 }
 ```
 
+## Gram matrix
+
+```{r}
+compute_gram_matrix <- function(X, kernel_function) {
+  n <- nrow(X)
+  gram_matrix <- matrix(0, nrow = n, ncol = n)
+  
+  for (i in 1:n) {
+    for (j in 1:n) {
+      gram_matrix[i, j] <- kernel_function(X[i, ], X[j, ])
+    }
+  }
+  
+  return(gram_matrix)
+}
+```
+
+
 
 # Assignment 3: Support Vector Machines
 

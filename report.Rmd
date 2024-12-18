@@ -103,6 +103,14 @@ gaussian_time <- function(x1, x2) {
   time_diff <- abs(as.numeric(difftime(time1, time2, units = "hours")))
   return(exp(- (time_diff^2) / (2 * h_time^2)))
 }
+
+gaussian_sum <- function(x1, x2) {
+  gaussian_physical(x1,x2) + gaussian_date(x1, x2) + gaussian_time(x1, x2)
+}
+
+gaussian_product <- function(x1, x2) {
+  gaussian_physical(x1,x2) * gaussian_date(x1, x2) * gaussian_time(x1, x2)
+}
 ```
 
 ## Gram matrix
